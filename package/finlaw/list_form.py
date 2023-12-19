@@ -32,46 +32,72 @@ class ListForm:
         luku, pykälä, momentti = address
         start, end = self._find_luku(luku)
         if pykälä:
-            start, end = self._find_pykälä(pykälä, (start, end + 1))
+            start, end = self._find_pykälä(pykälä, start, end + 1)
         if momentti:
-            start, end = self._find_momentti(momentti, (start, end + 1))
+            start, end = self._find_momentti(momentti, start, end + 1)
         return (start, end)
 
     def repeal(self, address):
         i = self.find(address)
         self.items[i] = Item(ItemType.Tyhjä, None, None)
 
-    def _find_luku(self, n) -> (int, int):
-        start = None
-        i = 0
-        for i in range(len(self)):
-            item = self[i]
-            if (item.type == ItemType.Luku) and (item.number == n):
-                start = i
-                break
-        if start is None:
-            raise IndexError
-        for i in range(start + 1, len(self)):
-            item = self[i]
-            if item.type in (ItemType.Osa, ItemType.Luku):
-                return (start, i - 1)
-        return (start, len(self) - 1)
+    def _find_luku(self, n: int) -> (int, int):
+        start = self._find_luku_start(n, 0, len(self))
+        stop = self._find_luku_stop(start + 1, len(self))
+        assert stop >= start, (start, stop)
+        return (start, stop)
 
-    def _find_pykälä(self, n, span) -> (int, int):
-        start = None
-        i = 0
-        for i in range(*span):
-            item = self[i]
-            if (item.type == ItemType.Pykälä) and (item.number == n):
-                start = i
-                break
-        if start is None:
-            raise IndexError
-        for i in range(start + 1, span[1]):
-            item = self[i]
-            if item.type in (ItemType.Osa, ItemType.Luku, ItemType.Pykälä):
-                return (start, i - 1)
-        return (start, span[1] - 1)
+    def _find_luku_start(self, n: int, begin: int, end: int) -> int:
+        for i in range(begin, end):
+            it = self[i]
+            if (it.type == ItemType.Luku) and (it.number == n):
+                return i
+        raise ValueError(f"Could not find Luku #{n}")
 
-    def _find_momentti(self, pykälä, span) -> (int, int):
-        raise NotImplementedError
+    def _find_luku_stop(self, begin: int, end: int) -> int:
+        for i in range(begin, end):
+            if self[i].type in (ItemType.Osa, ItemType.Luku):
+                return i - 1
+        return end - 1
+
+    def _find_pykälä(self, n: int, begin: int, end: int) -> (int, int):
+        start = self._find_pykälä_start(n, begin, end)
+        stop = self._find_pykälä_stop(start + 1, end)
+        assert stop >= start
+        return (start, stop)
+
+    def _find_pykälä_start(self, n: int, begin: int, end: int) -> int:
+        for i in range(begin, end):
+            it = self[i]
+            if (it.type == ItemType.Pykälä) and (it.number == n):
+                return i
+        raise ValueError(f"Could not find Pykälä #{n}")
+
+    def _find_pykälä_stop(self, begin: int, end: int) -> int:
+        for i in range(begin, end):
+            if self[i].type in (ItemType.Osa, ItemType.Luku, ItemType.Pykälä):
+                return i - 1
+        return end - 1
+
+    def _find_momentti(self, n: int, begin: int, end: int) -> (int, int):
+        start = self._find_momentti_start(n, begin, end)
+        stop = self._find_momentti_stop(start + 1, end)
+        assert stop >= start
+        return (start, stop)
+
+    def _find_momentti_start(self, n: int, begin: int, end: int) -> int:
+        k = 1
+        for i in range(begin, end):
+            it = self[i]
+            if it.type == ItemType.Teksti:
+                if k == n:
+                    return i
+                else:
+                    k += 1
+        raise ValueError(f"Could not find Momentti #{n}")
+
+    def _find_momentti_stop(self, begin: int, end: int) -> int:
+        for i in range(begin, end):
+            if self[i].type in (ItemType.Osa, ItemType.Luku, ItemType.Pykälä, ItemType.Teksti):
+                return i - 1
+        return end - 1

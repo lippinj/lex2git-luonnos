@@ -31,16 +31,25 @@ class ListForm:
 
     def find(self, address) -> (int, int):
         luku, pykälä, momentti = address
-        start, end = self._find_luku(luku)
+        start, stop = self._find_luku(luku)
         if pykälä:
-            start, end = self._find_pykälä(pykälä, start, end + 1)
+            start, stop = self._find_pykälä(pykälä, start, stop + 1)
         if momentti:
-            start, end = self._find_momentti(momentti, start, end + 1)
-        return (start, end)
+            start, stop = self._find_momentti(momentti, start, stop + 1)
+        return (start, stop)
 
     def repeal(self, address):
-        i = self.find(address)
-        self.items[i] = Item(ItemType.Tyhjä, None, None)
+        luku, pykälä, momentti = address
+        if momentti:
+            start, stop = self.find(address)
+            del self.items[start:stop+1]
+            self.items.insert(start, Item(ItemType.Tyhjä, None, None))
+        elif pykälä:
+            start, stop = self.find(pykälä)
+            if stop > start:
+                del self.items[start+1:stop+1]
+        else:
+            raise ValueError("Can't repeal Luku")
 
     def _find_luku(self, n: int) -> (int, int):
         start = self._find_luku_start(n, 0, len(self))

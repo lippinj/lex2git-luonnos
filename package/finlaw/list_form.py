@@ -51,6 +51,14 @@ class ListForm:
         else:
             raise ValueError("Can't repeal Luku")
 
+    def insert(self, address, item: Item):
+        luku, pykälä, momentti = address
+        if momentti:
+            start, stop = self.find(address)
+            self.items.insert(start, item)
+        else:
+            raise NotImplementedError
+
     def _find_luku(self, n: int) -> (int, int):
         start = self._find_luku_start(n, 0, len(self))
         stop = self._find_luku_stop(start + 1, len(self))

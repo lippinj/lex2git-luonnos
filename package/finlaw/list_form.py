@@ -7,8 +7,9 @@ class ItemType(Enum):
     Osa = 1
     Luku = 2
     Pykälä = 3
-    Teksti = 4
-    Tyhjä = 5
+    Kappale = 4
+    Kohta = 5
+    Tyhjä = 6
 
 
 @dataclass
@@ -89,7 +90,7 @@ class ListForm:
         k = 1
         for i in range(begin, end):
             it = self[i]
-            if it.type == ItemType.Teksti:
+            if it.type == ItemType.Kappale:
                 if k == n:
                     return i
                 else:
@@ -98,6 +99,6 @@ class ListForm:
 
     def _find_momentti_stop(self, begin: int, end: int) -> int:
         for i in range(begin, end):
-            if self[i].type in (ItemType.Osa, ItemType.Luku, ItemType.Pykälä, ItemType.Teksti):
+            if self[i].type in (ItemType.Osa, ItemType.Luku, ItemType.Pykälä, ItemType.Kappale):
                 return i - 1
         return end - 1

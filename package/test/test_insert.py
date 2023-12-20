@@ -4,7 +4,17 @@ from finlaw.serialization import markdown
 from finlaw.list_form import ItemType, Item, ListForm
 
 
-def test_momentin_lisääminen():
+def test_momentin_lisääminen_loppuun():
+    L = markdown.load(common.data_path("2002.1290.md"))
+
+    item = Item(ItemType.Kappale, None, "Viikoittaisen työajan lyhentämisenä ei pidetä sääesteestä johtuvaa työajan lyhentymistä, jossa työnteko estyy yhdeltä tai useammalta päivältä. Pakkasraja, jolloin sääeste on olemassa, määritetään rakennusalalla ennen työn aloittamista työmaakohtaisesti rakennustyövaihe ja työmaan muut olosuhteet huomioon ottaen. Vastaavasti metsäalalla voidaan etukäteen tarvittaessa määrittää sääesteeksi pakkasraja, jolloin ulkona työskentelyä ei voida kohtuudella vaatia.")
+    L.insert("4.1.2", item)
+    assert L[194] == Item(ItemType.Kohta, 4, "jolla on tuloa 1 luvun 6 §:n mukaisesta yritystoiminnasta tai omasta työstä.")
+    assert L[195] == item
+    assert L[196] == Item(ItemType.Pykälä, 2, "Sovittelujakso")
+
+
+def test_momentin_lisääminen_väliin():
     L = markdown.load(common.data_path("2002.1290.md"))
 
     item = Item(ItemType.Kappale, None, "Sen estämättä, mitä tämän lain 9 luvun 6 §:n 1 momentissa säädetään, 1 päivän tammikuuta ja 30 päivän kesäkuuta 2003 välisenä aikana työmarkkinatuki on kuitenkin 60 prosenttia sanotun momentin mukaisesti lasketusta työmarkkinatuesta.")

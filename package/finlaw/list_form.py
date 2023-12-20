@@ -102,11 +102,19 @@ class ListForm:
         addr = addr if isinstance(addr, Address) else Address(addr)
         if addr.kohta:
             assert item.number == addr.kohta
-            start, stop = self.find(addr.prev())
-            self.items.insert(stop + 1, item)
+            try:
+                start, stop = self.find(addr)
+                self.items.insert(start, item)
+            except IndexError:
+                start, stop = self.find(addr.prev())
+                self.items.insert(stop + 1, item)
         elif addr.momentti:
-            start, stop = self.find(addr)
-            self.items.insert(start, item)
+            try:
+                start, stop = self.find(addr)
+                self.items.insert(start, item)
+            except IndexError:
+                start, stop = self.find(addr.prev())
+                self.items.insert(stop + 1, item)
         else:
             raise NotImplementedError
 
@@ -150,7 +158,7 @@ class ListForm:
             it = self[i]
             if (it.type == ItemType.Pykälä) and (it.number == n):
                 return i
-        raise ValueError(f"Could not find Pykälä #{n}")
+        raise IndexError(f"Could not find Pykälä #{n}")
 
     def _find_pykälä_stop(self, begin: int, end: int) -> int:
         for i in range(begin, end):
@@ -173,7 +181,7 @@ class ListForm:
                     return i
                 else:
                     k += 1
-        raise ValueError(f"Could not find Momentti #{n}")
+        raise IndexError(f"Could not find Momentti #{n}")
 
     def _find_momentti_stop(self, begin: int, end: int) -> int:
         for i in range(begin, end):
@@ -196,7 +204,7 @@ class ListForm:
                     return i
                 else:
                     k += 1
-        raise ValueError(f"Could not find kohta #{n}")
+        raise IndexError(f"Could not find kohta #{n}")
 
     def _find_kohta_stop(self, begin: int, end: int) -> int:
         for i in range(begin, end):

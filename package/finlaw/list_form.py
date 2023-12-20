@@ -59,6 +59,16 @@ class ListForm:
         else:
             raise NotImplementedError
 
+    def change(self, address, item: Item):
+        luku, pykälä, momentti = address
+        if momentti:
+            start, stop = self.find(address)
+            if start < stop:
+                del self.items[start+1:stop+1]
+            self.items[start] = item
+        else:
+            raise NotImplementedError
+
     def _find_luku(self, n: int) -> (int, int):
         start = self._find_luku_start(n, 0, len(self))
         stop = self._find_luku_stop(start + 1, len(self))

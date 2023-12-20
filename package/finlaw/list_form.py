@@ -41,7 +41,7 @@ class Item:
 class Address:
     def __init__(self, spec: tuple|str):
         if isinstance(spec, str):
-            spec = tuple(int(e) for e in src.split("."))
+            spec = tuple(int(e) for e in spec.split("."))
 
         assert len(spec) in (1, 2, 3, 4), spec
         assert any(e >= 1 for e in spec), spec

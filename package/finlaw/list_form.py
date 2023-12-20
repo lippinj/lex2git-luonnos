@@ -51,6 +51,16 @@ class Address:
         self.momentti = None if (len(spec) < 3) else spec[2]
         self.kohta = None if (len(spec) < 4) else spec[3]
 
+    def prev(self):
+        if self.kohta:
+            assert self.kohta > 1
+            return Address((self.luku, self.pykälä, self.momentti, self.kohta - 1))
+        elif self.momentti:
+            assert self.momentti > 1
+            return Address((self.luku, self.pykälä, self.momentti - 1, self.kohta))
+        else:
+            raise ValueError
+
 
 class ListForm:
     def __init__(self, items: [Item] = None):
@@ -91,7 +101,9 @@ class ListForm:
     def insert(self, addr: Address|tuple|str, item: Item):
         addr = addr if isinstance(addr, Address) else Address(addr)
         if addr.kohta:
-            raise NotImplementedError
+            assert item.number == addr.kohta
+            start, stop = self.find(addr.prev())
+            self.items.insert(stop + 1, item)
         elif addr.momentti:
             start, stop = self.find(addr)
             self.items.insert(start, item)

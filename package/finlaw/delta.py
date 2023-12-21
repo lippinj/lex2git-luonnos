@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from finlaw.list_form import Address, Item, ListForm
+from finlaw.list_form import Address, Item, ItemType, ListForm
 
 
 class Action(Enum):
@@ -17,13 +17,22 @@ class Delta:
     item: Item|None
 
     def __repr__(self) -> str:
-        return f"<{self.action}{repr(self.address)}:{repr(self.item)}>"
+        match self.action:
+            case Action.Repeal:
+                symbol = "-"
+            case Action.Change:
+                symbol = "*"
+            case Action.Insert:
+                symbol = "-"
+            case _:
+                raise NotImplementedError
+        return f"<{symbol}{repr(self.address)}:{repr(self.item)}>"
 
     def apply(self, L: ListForm) -> None:
-        match action:
-            case '+':
+        match self.action:
+            case Action.Repeal:
                 L.repeal(self.address)
-            case '*':
+            case Action.Change:
                 L.change(self.address, self.item)
             case Action.Insert:
                 L.insert(self.address, self.item)
@@ -46,7 +55,6 @@ class DeltaSet:
     @staticmethod
     def parse_list_form(L: ListForm):
         act, clauses = DeltaSet.clean_paragraphs(L)
-        
         actions = []
         for action, text in clauses:
             assert action == "lisätään"
@@ -57,6 +65,26 @@ class DeltaSet:
                 momentti = int(m.group(3))
                 address = Address((luku, pykälä, momentti))
                 actions.append((Action.Insert, address))
+        return DeltaSet(DeltaSet.build_deltas(L, actions))
+
+    @staticmethod
+    def build_deltas(L: ListForm, actions: [(Action, Address)]) -> [Delta]:
+        deltas = []
+        for action, address in actions:
+            if address.kohta:
+                raise NotImplementedError
+            elif address.momentti:
+                found = None
+                for it in L[L.find(address.parent())][1:]:
+                    if it.type == ItemType.Kappale:
+                        found = it
+                        break
+                if not found:
+                    raise Exception
+                deltas.append(Delta(action, address, it))
+            else:
+                raise NotImplementedError
+        return deltas
 
     @staticmethod
     def clean_paragraphs(L: ListForm) -> (str, [(str, str)]):

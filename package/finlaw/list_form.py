@@ -9,7 +9,9 @@ class ItemType(Enum):
     Pykälä = 3
     Kappale = 4
     Kohta = 5
-    Tyhjä = 6
+    Katkoviiva = 6
+    Palstaviiva = 7
+    Tyhjä = 8
 
 
 @dataclass
@@ -37,6 +39,10 @@ class Item:
             case _:
                 raise NotImplementedError
 
+    @staticmethod
+    def Kappale(text: str):
+        return Item(ItemType.Kappale, None, text)
+
 
 class Address:
     def __init__(self, spec: tuple|str):
@@ -44,7 +50,7 @@ class Address:
             spec = tuple(int(e) for e in spec.split("."))
 
         assert len(spec) in (1, 2, 3, 4), spec
-        assert any(e >= 1 for e in spec), spec
+        assert all(e >= 1 for e in spec), spec
 
         self.luku = spec[0]
         self.pykälä = None if (len(spec) < 2) else spec[1]
@@ -61,13 +67,26 @@ class Address:
             s += f".{self.kohta}"
         return s
 
+    def __eq__(self, other) -> bool:
+        return (self.luku == other.luku) and (self.pykälä == other.pykälä) and (self.momentti == other.momentti) and (self.kohta == other.kohta)
+
+    def parent(self):
+        if self.kohta:
+            return Address((self.luku, self.pykälä, self.momentti))
+        elif self.momentti:
+            return Address((self.luku, self.pykälä))
+        elif self.luku:
+            return Address((self.luku))
+        else:
+            raise ValueError
+
     def prev(self):
         if self.kohta:
             assert self.kohta > 1
             return Address((self.luku, self.pykälä, self.momentti, self.kohta - 1))
         elif self.momentti:
             assert self.momentti > 1
-            return Address((self.luku, self.pykälä, self.momentti - 1, self.kohta))
+            return Address((self.luku, self.pykälä, self.momentti - 1))
         else:
             raise ValueError
 

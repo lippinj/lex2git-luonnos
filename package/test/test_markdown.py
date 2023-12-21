@@ -56,3 +56,13 @@ def test_pykälän_parsiminen():
 
     L = markdown.load(common.data_path("2003.39.md"))
     assert L.items[4] == Item(ItemType.Pykälä, 1, "Voimaantulosäädökset")
+
+
+def test_katkoviivan_parsiminen():
+    L = markdown.load(common.data_path("2003.39.md"))
+    assert L.items[5] == Item(ItemType.Katkoviiva, None, None)
+    assert L.items[7] == Item(ItemType.Katkoviiva, None, None)
+
+def test_palstaviivan_parsiminen():
+    L = markdown.load(common.data_path("2003.39.md"))
+    assert L.items[8] == Item(ItemType.Palstaviiva, None, None)

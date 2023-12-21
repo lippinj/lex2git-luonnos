@@ -34,6 +34,10 @@ def parse_one(s: str) -> Item:
         return Item(ItemType.Pykälä, int(m.group(1)), m.group(2))
     if m := re.match(r"(\d+)\) (.+)", s):
         return Item(ItemType.Kohta, int(m.group(1)), m.group(2))
+    if s == "...":
+        return Item(ItemType.Katkoviiva, None, None)
+    if s == "---":
+        return Item(ItemType.Palstaviiva, None, None)
     return Item(ItemType.Kappale, None, s)
 
 
@@ -49,6 +53,10 @@ def compose_one(item: Item) -> str:
             return f"#### {item.number} §<br>{item.text}"
         case ItemType.Kohta:
             return f"{item.number}) {item.text}"
+        case ItemType.Katkoviiva:
+            return "..."
+        case ItemType.Palstaviiva:
+            return "---"
         case ItemType.Kappale:
             return item.text
         case _:

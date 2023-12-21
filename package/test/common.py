@@ -1,4 +1,5 @@
 import os
+import re
 
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -12,3 +13,7 @@ def data_path(filename: str) -> str:
 def read_data(filename: str) -> str:
     with open(data_path(filename), "r", encoding="utf-8") as f:
         return f.read()
+
+
+def paragraph(s: str) -> str:
+    return re.sub(r"[ \n\t]{2,}", " ", s).strip()

@@ -6,15 +6,31 @@ from finlaw.delta import Delta, DeltaSet
 
 
 def test_deltan_parsiminen():
+    p0 = common.paragraph("""
+        Sen estämättä, mitä tämän lain 9 luvun 6 §:n 1 momentissa säädetään,
+        1 päivän tammikuuta ja 30 päivän kesäkuuta 2003 välisenä aikana
+        työmarkkinatuki on kuitenkin 60 prosenttia sanotun momentin mukaisesti
+        lasketusta työmarkkinatuesta.
+    """)
+
     L = markdown.load(common.data_path("2003.39.md"))
     d = DeltaSet.parse_list_form(L)
     assert len(d) == 1
-    assert d[0] == Delta(Action.Insert, Address("15.1.12"), Item.Momentti("Sen estämättä, mitä tämän lain 9 luvun 6 §:n 1 momentissa säädetään, 1 päivän tammikuuta ja 30 päivän kesäkuuta 2003 välisenä aikana työmarkkinatuki on kuitenkin 60 prosenttia sanotun momentin mukaisesti lasketusta työmarkkinatuesta."))
+    assert d[0] == Delta(Action.Insert, Address("15.1.12"), Item.Momentti(p0))
 
 
 def test_clean_paragraph():
-    text = "_lisätään_ 30 päivänä joulukuuta 2002 annetun työttömyysturvalain (1290/2002) 15 luvun 1 §:ään uusi 12 momentti, jolloin nykyinen 12―15 momentti siirtyvät 13―16 momentiksi, seuraavasti:"
-    action, text, act = DeltaSet.clean_paragraph(text)
+    p0 = common.paragraph("""
+        _lisätään_ 30 päivänä joulukuuta 2002 annetun työttömyysturvalain
+        (1290/2002) 15 luvun 1 §:ään uusi 12 momentti, jolloin nykyinen 12―15
+        momentti siirtyvät 13―16 momentiksi, seuraavasti:
+    """)
+    p1 = common.paragraph("""
+        15 luvun 1 §:ään uusi 12 momentti, jolloin nykyinen 12―15 momentti
+        siirtyvät 13―16 momentiksi
+    """)
+
+    action, text, act = DeltaSet.clean_paragraph(p0)
     assert action == "lisätään"
-    assert text == "15 luvun 1 §:ään uusi 12 momentti, jolloin nykyinen 12―15 momentti siirtyvät 13―16 momentiksi"
     assert act == "1290/2002"
+    assert text == p1

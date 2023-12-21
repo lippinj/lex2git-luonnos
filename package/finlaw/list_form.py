@@ -51,6 +51,16 @@ class Address:
         self.momentti = None if (len(spec) < 3) else spec[2]
         self.kohta = None if (len(spec) < 4) else spec[3]
 
+    def __repr__(self) -> str:
+        s = str(self.luku)
+        if self.pykälä:
+            s += f".{self.pykälä}"
+        if self.momentti:
+            s += f".{self.momentti}"
+        if self.kohta:
+            s += f".{self.kohta}"
+        return s
+
     def prev(self):
         if self.kohta:
             assert self.kohta > 1
@@ -61,6 +71,10 @@ class Address:
         else:
             raise ValueError
 
+    @staticmethod
+    def bake(a):
+        return a if isinstance(a, Address) else Address(a)
+
 
 class ListForm:
     def __init__(self, items: [Item] = None):
@@ -70,10 +84,19 @@ class ListForm:
         return len(self.items)
 
     def __getitem__(self, ind):
+        if isinstance(ind, tuple):
+            return self.items[ind[0]:ind[1]+1]
         return self.items[ind]
 
+    def find_leader(self) -> (int, int):
+        assert self.items[1].type == ItemType.Kappale
+        for i in range(2, len(self.items)):
+            if self.items[i].type != ItemType.Kappale:
+                break
+        return (1, i - 1)
+
     def find(self, addr: Address|tuple|str) -> (int, int):
-        addr = addr if isinstance(addr, Address) else Address(addr)
+        addr = Address.bake(addr)
         start, stop = self._find_luku(addr.luku)
         if addr.pykälä:
             start, stop = self._find_pykälä(addr.pykälä, start, stop + 1)
@@ -84,7 +107,7 @@ class ListForm:
         return (start, stop)
 
     def repeal(self, addr: Address|tuple|str):
-        addr = addr if isinstance(addr, Address) else Address(addr)
+        addr = Address.bake(addr)
         if addr.kohta:
             raise NotImplementedError
         if addr.momentti:
@@ -99,7 +122,7 @@ class ListForm:
             raise ValueError("Can't repeal Luku")
 
     def insert(self, addr: Address|tuple|str, item: Item):
-        addr = addr if isinstance(addr, Address) else Address(addr)
+        addr = Address.bake(addr)
         if addr.kohta:
             assert item.number == addr.kohta
             try:
@@ -119,7 +142,7 @@ class ListForm:
             raise NotImplementedError
 
     def change(self, addr: Address|tuple|str, item: Item):
-        addr = addr if isinstance(addr, Address) else Address(addr)
+        addr = Address.bake(addr)
         if addr.kohta or addr.momentti:
             start, stop = self.find(addr)
             if start < stop:

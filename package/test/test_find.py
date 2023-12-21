@@ -4,6 +4,14 @@ from finlaw.serialization import markdown
 from finlaw.list_form import ItemType, Item, ListForm
 
 
+def test_johtolauseen_etsiminen():
+    L = markdown.load(common.data_path("2002.1290.md"))
+    assert L.find_leader() == (1, 1)
+
+    L = markdown.load(common.data_path("2003.39.md"))
+    assert L.find_leader() == (1, 2)
+
+
 def test_luvun_etsiminen():
     L = markdown.load(common.data_path("2002.1290.md"))
     # Luku päättyy seuraavan luvun alkuun
